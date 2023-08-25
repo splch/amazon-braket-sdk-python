@@ -78,7 +78,8 @@ class _ApproximationParser(QASMVisitor[_ParseState]):
         frame_ids = set()
         for expression in parameters:
             identifier_name = self.visit(expression, context)
-            if match := re.search(r"^\$[0-9]+$", identifier_name):
+            match = re.search(r"^\$[0-9]+$", identifier_name)
+            if match:
                 qubit_number = match.group()[1:]
                 frame_ids.update(self._qubit_frames_mapping.get(qubit_number, []))
             else:
