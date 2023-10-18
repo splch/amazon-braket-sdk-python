@@ -13,6 +13,10 @@
 
 from __future__ import annotations
 
+from tqdm.auto import tqdm
+from time import sleep
+
+
 import math
 import tarfile
 import tempfile
@@ -81,6 +85,7 @@ class AwsQuantumJob(QuantumJob):
         aws_session: AwsSession = None,
         tags: dict[str, str] = None,
         logger: Logger = getLogger(__name__),
+        show_progress: bool = False,
     ) -> AwsQuantumJob:
         """Creates a hybrid job by invoking the Braket CreateJob API.
 
@@ -203,6 +208,9 @@ class AwsQuantumJob(QuantumJob):
 
         job_arn = aws_session.create_job(**create_job_kwargs)
         job = AwsQuantumJob(job_arn, aws_session)
+
+        if show_progress:
+            output_progress(job)
 
         if wait_until_complete:
             print(f"Initializing Braket Job: {job_arn}")
@@ -621,3 +629,15 @@ class AwsQuantumJob(QuantumJob):
                 if e.response["Error"]["Code"] != "ResourceNotFoundException":
                     raise e
         raise ValueError(f"QPU '{device}' not found.")
+
+def output_progress(job):
+    current_queue_size = parse_queue_size(job.queue_position().queue_position)
+    with tqdm(current_queue_size) as pbar:
+        for i in range(1000):
+            sleep(0.2)
+            pbar.set_description(f"Task status {job.status()} queue position {job.queue_position()}")
+            pbar.update(current_queue_size - parse_queue_size(job.queue_position().queue_position))
+
+def parse_queue_size(queue_size: str) -> int:
+    queue_size_int = int(queue_size) if queue_size.isdigit() else 15
+    return queue_size_int

@@ -41,6 +41,7 @@ setup(
         "openpulse",
         "openqasm3",
         "sympy",
+        "tqdm",
     ],
     extras_require={
         "test": [
