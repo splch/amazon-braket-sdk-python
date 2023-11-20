@@ -351,7 +351,7 @@ class PulseSequence:
         cls, calibration: dict, waveforms: dict[Waveform], frames: dict[Frame]
     ) -> PulseSequence:
         """
-        Parsing a JSON input based on https://github.com/aws/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py#L26.
+        Parsing a JSON input based on https://github.com/amazon-braket/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py#L26.
 
         Args:
             calibration (dict): The pulse instruction to parse

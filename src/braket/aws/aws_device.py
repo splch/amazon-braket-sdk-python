@@ -459,7 +459,8 @@ class AwsDevice(Device):
 
         Please see `braket.device_schema` in amazon-braket-schemas-python_
 
-        .. _amazon-braket-schemas-python: https://github.com/aws/amazon-braket-schemas-python"""
+        .. _amazon-braket-schemas-python: https://github.com/amazon-braket/amazon-braket-schemas-python
+        """  # noqa E501
         return self._properties
 
     @property
@@ -782,7 +783,7 @@ class AwsDevice(Device):
 
         Args:
             calibration_data (dict): The data to be parsed. Based on
-                https://github.com/aws/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py.
+                https://github.com/amazon-braket/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py.
 
         Returns:
             dict[tuple[Gate, QubitSet], PulseSequence]: The

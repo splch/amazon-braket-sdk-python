@@ -59,7 +59,7 @@ class Waveform(ABC):
     @abstractmethod
     def _from_calibration_schema(waveform_json: dict) -> Waveform:
         """
-        Parses a JSON input and returns the BDK waveform. See https://github.com/aws/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py#L104
+        Parses a JSON input and returns the BDK waveform. See https://github.com/amazon-braket/amazon-braket-schemas-python/blob/main/src/braket/device_schema/pulse/native_gate_calibrations_v1.py#L104
 
         Args:
             waveform_json (dict): A JSON object with the needed parameters for making the Waveform.

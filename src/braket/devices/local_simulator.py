@@ -184,7 +184,8 @@ class LocalSimulator(Device):
 
         Please see `braket.device_schema` in amazon-braket-schemas-python_
 
-        .. _amazon-braket-schemas-python: https://github.com/aws/amazon-braket-schemas-python"""
+        .. _amazon-braket-schemas-python: https://github.com/amazon-braket/amazon-braket-schemas-python
+        """  # noqa E501
         return self._delegate.properties
 
     @staticmethod
