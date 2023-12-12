@@ -72,6 +72,8 @@ from braket.tasks import (
 from braket.tracking.tracking_context import broadcast_event
 from braket.tracking.tracking_events import _TaskCompletionEvent
 
+from braket.validation.dry_run import is_enabled, retrieve_results
+
 
 class AwsQuantumTask(QuantumTask):
     """Amazon Braket implementation of a quantum task. A quantum task can be a circuit,
@@ -508,11 +510,14 @@ class AwsQuantumTask(QuantumTask):
         GateModelQuantumTaskResult, AnnealingQuantumTaskResult, PhotonicModelQuantumTaskResult
     ]:
         current_metadata = self.metadata(True)
-        result_string = self._aws_session.retrieve_s3_object_body(
-            current_metadata["outputS3Bucket"],
-            current_metadata["outputS3Directory"] + f"/{AwsQuantumTask.RESULTS_FILENAME}",
-        )
-        self._result = _format_result(BraketSchemaBase.parse_raw_schema(result_string))
+        if is_enabled():
+            self._result = retrieve_results(self._arn)
+        else:
+            result_string = self._aws_session.retrieve_s3_object_body(
+                current_metadata["outputS3Bucket"],
+                current_metadata["outputS3Directory"] + f"/{AwsQuantumTask.RESULTS_FILENAME}",
+            )
+            self._result = _format_result(BraketSchemaBase.parse_raw_schema(result_string))
         task_event = {
             "arn": self.id,
             "status": self.state(),

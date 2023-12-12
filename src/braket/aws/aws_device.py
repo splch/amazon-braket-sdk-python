@@ -47,6 +47,8 @@ from braket.pulse import ArbitraryWaveform, Frame, Port, PulseSequence
 from braket.pulse.waveforms import _parse_waveform_from_calibration_schema
 from braket.schema_common import BraketSchemaBase
 
+from braket.validation.dry_run import is_enabled
+
 
 class AwsDeviceType(str, Enum):
     """Possible AWS device types"""

@@ -31,6 +31,7 @@ import braket._schemas as braket_schemas
 import braket._sdk as braket_sdk
 from braket.tracking.tracking_context import active_trackers, broadcast_event
 from braket.tracking.tracking_events import _TaskCreationEvent, _TaskStatusEvent
+from braket.validation.dry_run import create_task_dry_run, is_enabled
 
 
 class AwsSession(object):
@@ -228,7 +229,11 @@ class AwsSession(object):
         job_token = os.getenv("AMZN_BRAKET_JOB_TOKEN")
         if job_token:
             boto3_kwargs.update({"jobToken": job_token})
-        response = self.braket_client.create_quantum_task(**boto3_kwargs)
+        print(is_enabled())
+        if is_enabled():
+            response = create_task_dry_run(**boto3_kwargs)
+        else:
+            response = self.braket_client.create_quantum_task(**boto3_kwargs) 
         broadcast_event(
             _TaskCreationEvent(
                 arn=response["quantumTaskArn"],
@@ -280,9 +285,12 @@ class AwsSession(object):
         Returns:
             dict[str, Any]: The response from the Amazon Braket `GetQuantumTask` operation.
         """
-        response = self.braket_client.get_quantum_task(
-            quantumTaskArn=arn, additionalAttributeNames=["QueueInfo"]
-        )
+        if is_enabled():
+            response = {"quantumTaskArn": arn, "status": "COMPLETED"}
+        else:
+            response = self.braket_client.get_quantum_task(
+                quantumTaskArn=arn, additionalAttributeNames=["QueueInfo"]
+            )
         broadcast_event(_TaskStatusEvent(arn=response["quantumTaskArn"], status=response["status"]))
         return response
 
