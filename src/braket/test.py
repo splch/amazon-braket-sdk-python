@@ -6,14 +6,17 @@ from braket.devices import Devices
 from braket.device_schema.device_action_properties import DeviceActionType
 
 dry_run.enable()
+
+
 d = AwsDevice(Devices.Amazon.SV1)
-print(d.properties.action[DeviceActionType.OPENQASM].supportedOperations)
-# c = Circuit().h(0)
-# t = d.run(c, shots=1)
-# print(t)
-# r = t.result()
-# print(r)
-# dry_run.print_stats()
+c = Circuit().h(0)
+t = d.run(c, shots=1)
+print(t)
+r = t.result()
+print(r)
+
+
+dry_run.print_stats()
 
 # dry_run.disable()
 # t = d.run(c, shots=1)

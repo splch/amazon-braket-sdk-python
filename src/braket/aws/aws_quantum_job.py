@@ -43,8 +43,10 @@ from braket.jobs.metrics_data.cwl_insights_metrics_fetcher import CwlInsightsMet
 # for the files, since all those metrics are retrieved from the CW.
 from braket.jobs.metrics_data.definitions import MetricStatistic, MetricType
 from braket.jobs.quantum_job import QuantumJob
+from braket.jobs.local.local_job import LocalQuantumJob
 from braket.jobs.quantum_job_creation import prepare_quantum_job
 
+from braket.validation.dry_run import is_enabled
 
 class AwsQuantumJob(QuantumJob):
     """Amazon Braket implementation of a quantum job."""
@@ -188,33 +190,46 @@ class AwsQuantumJob(QuantumJob):
         """
         aws_session = AwsQuantumJob._initialize_session(aws_session, device, logger)
 
-        create_job_kwargs = prepare_quantum_job(
-            device=device,
-            source_module=source_module,
-            entry_point=entry_point,
-            image_uri=image_uri,
-            job_name=job_name,
-            code_location=code_location,
-            role_arn=role_arn,
-            hyperparameters=hyperparameters,
-            input_data=input_data,
-            instance_config=instance_config,
-            distribution=distribution,
-            stopping_condition=stopping_condition,
-            output_data_config=output_data_config,
-            copy_checkpoints_from_job=copy_checkpoints_from_job,
-            checkpoint_config=checkpoint_config,
-            aws_session=aws_session,
-            tags=tags,
-            reservation_arn=reservation_arn,
-        )
+        if is_enabled():
+            job = LocalQuantumJob.create(device=device, 
+                                  source_module=source_module,
+                                  entry_point=entry_point,
+                                  image_uri=image_uri,
+                                  job_name=job_name,
+                                  code_location=code_location,
+                                  role_arn=role_arn,
+                                  hyperparameters=hyperparameters,
+                                  input_data=input_data,
+                                  output_data_config=output_data_config,
+                                  checkpoint_config=checkpoint_config,
+                                  aws_session=aws_session,)
+        else:
+            create_job_kwargs = prepare_quantum_job(
+                device=device,
+                source_module=source_module,
+                entry_point=entry_point,
+                image_uri=image_uri,
+                job_name=job_name,
+                code_location=code_location,
+                role_arn=role_arn,
+                hyperparameters=hyperparameters,
+                input_data=input_data,
+                instance_config=instance_config,
+                distribution=distribution,
+                stopping_condition=stopping_condition,
+                output_data_config=output_data_config,
+                copy_checkpoints_from_job=copy_checkpoints_from_job,
+                checkpoint_config=checkpoint_config,
+                aws_session=aws_session,
+                tags=tags,
+                reservation_arn=reservation_arn,
+            )
+            job_arn = aws_session.create_job(**create_job_kwargs)
+            job = AwsQuantumJob(job_arn, aws_session)
 
-        job_arn = aws_session.create_job(**create_job_kwargs)
-        job = AwsQuantumJob(job_arn, aws_session)
-
-        if wait_until_complete:
-            print(f"Initializing Braket Job: {job_arn}")
-            job.logs(wait=True)
+            if wait_until_complete:
+                print(f"Initializing Braket Job: {job_arn}")
+                job.logs(wait=True)
 
         return job
 

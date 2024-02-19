@@ -229,7 +229,6 @@ class AwsSession(object):
         job_token = os.getenv("AMZN_BRAKET_JOB_TOKEN")
         if job_token:
             boto3_kwargs.update({"jobToken": job_token})
-        print(is_enabled())
         if is_enabled():
             response = create_task_dry_run(**boto3_kwargs)
         else:
