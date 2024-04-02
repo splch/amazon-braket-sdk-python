@@ -36,7 +36,10 @@ class AssignTransformer(converter.Base):
             ast.stmt: Transformed node.
         """
         template = """
-        tar_ = ag__.assign_stmt(tar_name_, val_)
+        try:
+            tar_ = ag__.assign_stmt(tar_name_, val_, tar_)
+        except NameError:
+            tar_ = ag__.assign_stmt(tar_name_, val_)
         """
         try:
             # Assignments for main function return statements have already been handled,

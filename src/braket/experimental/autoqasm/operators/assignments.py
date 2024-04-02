@@ -14,6 +14,8 @@
 
 """Operators for assignment statements."""
 
+from __future__ import annotations
+
 import copy
 from collections.abc import Iterable
 from typing import Any
@@ -23,7 +25,7 @@ import oqpy.base
 from malt.operators.variables import UndefinedReturnValue
 
 from braket.experimental.autoqasm import constants, errors, program, types
-from braket.experimental.autoqasm.types.conversions import var_type_from_oqpy
+from braket.experimental.autoqasm.types.conversions import map_parameter_type, var_type_from_oqpy
 
 
 def assign_for_output(target_name: str, value: Any) -> Any:
@@ -98,7 +100,7 @@ def _add_assignment(target_name: str, value: Any) -> Any:
     return target
 
 
-def assign_stmt(target_name: str, value: Any) -> Any:
+def assign_stmt(target_name: str, value: Any, previous_value: Any | None = None) -> Any:
     """Operator declares the `oq` variable, or sets variable's value if it's
     already declared.
 
@@ -107,6 +109,8 @@ def assign_stmt(target_name: str, value: Any) -> Any:
             name on the lhs of an assignment statement.
         value (Any): The value of assignment. It is the object on the rhs of
             an assignment statement.
+        previous_value (Any | None): The previous value of the assignment target
+            variable. Defaults to None.
 
     Returns:
         Any: Assignment value with updated name attribute if the value is an
@@ -144,17 +148,25 @@ def assign_stmt(target_name: str, value: Any) -> Any:
 
         value = types.wrap_value(value)
 
+    oqpy_program = program_conversion_context.get_oqpy_program()
+
     if is_target_name_used and isinstance(value, (oqpy.base.Var, oqpy.base.OQPyExpression)):
         target = _get_oqpy_program_variable(target_name)
         _validate_assignment_types(target, value)
+    elif (
+        not isinstance(previous_value, oqpy.base.Var)
+        and issubclass(target_type := map_parameter_type(type(previous_value)), oqpy.base.Var)
+        and isinstance(value, oqpy.base.OQPyExpression)
+    ):
+        # TODO: raise an exception here? too late to replace Python part of `value` with a variable
+        target = target_type(previous_value)
+        target.name = target_name
     elif isinstance(value, oqpy.base.Var):
         target = copy.copy(value)
         target.init_expression = None
         target.name = target_name
     else:
         return value
-
-    oqpy_program = program_conversion_context.get_oqpy_program()
 
     value_init_expression = value.init_expression if isinstance(value, oqpy.base.Var) else None
     if is_value_name_used or value_init_expression is None:
