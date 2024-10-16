@@ -51,6 +51,7 @@ setup(
             "jsonschema==3.2.0",
             "pre-commit",
             "pylint",
+            "pyright",
             "pytest",
             "pytest-cov",
             "pytest-rerunfailures",

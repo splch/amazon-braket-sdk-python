@@ -1,2 +1,14 @@
+[tool.pyright]
+include = ["src"]
+exclude = ["**/node_modules",
+    "**/__pycache__",
+]
+defineConstant = { DEBUG = true }
+
+reportMissingImports = true
+reportMissingTypeStubs = true
+
+pythonVersion = "3.9"
+
 [tool.black]
 line-length = 100
