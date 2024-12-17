@@ -3,3 +3,4 @@ repos:
   hooks:
     # Run the linter.
     - id: ruff
+    - description: Ensures `ruff` linting checks pass during pre-commit`
